@@ -1,0 +1,69 @@
+﻿import pandas
+import numpy#导入pandas库和numpy库
+import time
+start = time.time()#返回代码运行时间
+class MKP_Object:
+    def allPossibility(restrict,attribute, nums):
+        #寻找满足限制条件的组合
+        parameter1 = [[]]
+        element = []
+        for i in range(nums):
+            parameter2 = []
+            for j in parameter1:
+                element=j+[i]
+                if sum(attribute[element])<restrict:
+                    parameter2.append(element)
+            parameter1 += parameter2
+        return parameter1
+
+    def last( aggregate1, aggregate2):
+        #寻找满足所有限制条件的价值组合
+        jiaoji = []
+        for i in aggregate1:
+            if i not in jiaoji and  i in aggregate2 :
+                jiaoji.append(i)
+        return jiaoji
+if __name__ == '__main__':
+    print("正在读取文本数据....")
+    f1 = open("MKP_Object input.txt")  # 读取文本数据
+    first_input = f1.read()
+    all_data = first_input.split('\n')  # 切割文本数据
+    want_data = []
+    bestValue=[]
+    data_1th = list(map(float, all_data[0].split()))  # 切割商品数据和约束条件数据
+    commodity_number = int(data_1th[0])  # 读入商品数
+    constraints_numbers = int(data_1th[1])  # 读入约束条件数
+    constraints = list(map(float, all_data[int(len(all_data) - 1)].split()))  # 读入约束条件
+    values = list(map(float, all_data[1].split()))  # 读入商品的价值
+    cost=pandas.Series(values)
+    for i in range(2, constraints_numbers + 2):
+        want_data.append(list(map(int, all_data[i].split())))  # 添加数据到列表中
+    data_array=numpy.array(want_data)
+
+    print("正在计算第1个可能性...." )
+    property=pandas.Series(data_array[0])
+    intersection=MKP_Object.allPossibility(constraints[0],property,commodity_number) #计算第一个属性的所选商品可能性
+    end = time.time()
+    print("计算第1个交集.....","所费时间为：",end - start,"s")
+    for i in range(1,constraints_numbers):
+        property=pandas.Series(data_array[i])
+        print("正在计算第%d个可能性...."%(i+1))
+        propertyPossibility=MKP_Object.allPossibility(constraints[i],property,commodity_number)
+        intersection=MKP_Object.last(intersection,propertyPossibility)
+        end = time.time()
+        print("计算第%d个交集...."%(i+1),"所费时间为：",end - start,"s")
+
+    for i in intersection:
+        bestValue.append(sum(cost[i]))  #将价值之和添加进列表bestValue
+    bestValue = numpy.array(bestValue)
+    num = numpy.argmax(bestValue)       #读取最大值下标
+    intersection = intersection[num]    #获取价格最大值的元素
+    print("\n")
+    print("商品的个数为：",commodity_number,"   属性的个数为：",constraints_numbers)
+    print("价值分别为：",values)
+    for i in range(len(intersection)):
+        print("选择第",intersection[i]+1,end=" 个商品 | ")
+    print("\n最大价值为",max(bestValue),"元")
+
+end = time.time()
+print("程序运行时间为： ",end - start,"s")
